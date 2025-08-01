@@ -14,3 +14,7 @@ tags = {
   Environment = "dev"
   Project     = "CognitoAuth"
 }
+
+user_pool_id        = "ap-south-1_YjeFkbY7H"
+user_pool_arn       = "arn:aws:cognito-idp:ap-south-1:211125304405:userpool/ap-south-1_YjeFkbY7H"
+user_pool_client_id = "74oivi4jf3c7batf64b5g3spen"
