@@ -73,3 +73,18 @@ variable "from_email" {
   type        = string
   default     = "rahul.khandelwal@granimals.com"
 }
+
+variable "user_pool_id" {
+  description = "ID of the Cognito User Pool"
+  type        = string
+}
+
+variable "user_pool_arn" {
+  description = "ARN of the Cognito User Pool"
+  type        = string
+}
+
+variable "user_pool_client_id" {
+  description = "Client ID of the Cognito User Pool"
+  type        = string
+}
