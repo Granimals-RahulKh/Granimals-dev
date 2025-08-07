@@ -47,16 +47,15 @@ variable "register_function_name" {
   default     = null
 }
 
+variable "from_email" {
+  type        = string
+  default     = "rahul.khandelwal@granimals.com"
+}
+
 #variable "sns_topic_arn" {
 #  description = "ARN of the SNS topic for sending user notifications"
 #  type        = string
 #}
-
-variable "from_email" {
-  description = "Verified SES email address used as sender"
-  type        = string
-  default     = "rahul.khandelwal@granimals.com"
-}
 
 
 variable "rds_secret_arn" {
