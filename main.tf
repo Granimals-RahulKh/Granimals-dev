@@ -73,20 +73,20 @@ module "lambda_change_password" {
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
-module "lambda_unknown_user" {
+module "lambda_login" {
   source                 = "./modules/lambda"
-  lambda_name            = "unknown_user"
-  handler                = "unknown_user.lambda_handler"
+  lambda_name            = "login"
+  handler                = "login.lambda_handler"
   runtime                = "python3.12"
   user_pool_id           = var.user_pool_id
   user_pool_arn          = var.user_pool_arn
   user_pool_client_id    = var.user_pool_client_id
   register_function_name = module.lambda_register_user.lambda_function_name
   lambda_s3_bucket       = var.lambda_s3_bucket
-  lambda_function_key    = var.unknown_user_lambda_s3_key
+  lambda_function_key    = var.login_lambda_s3_key
   user_groups            = local.user_groups
   api_gateway_arn        = module.api_gateway.api_gateway_arn
-  api_gateway_paths      = ["unknown_user"]
+  api_gateway_paths      = ["login"]
   from_email             = var.from_email
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
@@ -118,6 +118,6 @@ module "api_gateway" {
   register_user_lambda_arn    = module.lambda_register_user.lambda_arn
   change_password_lambda_arn  = module.lambda_change_password.lambda_arn
   delete_user_lambda_arn      = module.lambda_delete_user.lambda_arn
-  unknown_user_lambda_arn     = module.lambda_unknown_user.lambda_arn
+  login_lambda_arn     = module.lambda_login.lambda_arn
   insert_diet_plan_lambda_arn = module.lambda_insert_diet_plan.lambda_arn
 }

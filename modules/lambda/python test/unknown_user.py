@@ -118,7 +118,7 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': str(e)})
         }
 ##---------------------------------------------------------##
-##                     unknown_user.py                     ##
+##                     login.py                            ##
 ##---------------------------------------------------------##
 import os
 import json

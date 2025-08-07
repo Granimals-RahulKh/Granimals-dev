@@ -42,8 +42,8 @@ variable "delete_user_lambda_arn" {
   type        = string
 }
 
-variable "unknown_user_lambda_arn" {
-  description = "ARN of the unknown_user Lambda function"
+variable "login_lambda_arn" {
+  description = "ARN of the login Lambda function"
   type        = string
 }
 
