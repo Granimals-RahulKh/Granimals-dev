@@ -4,7 +4,7 @@ lambda_s3_bucket               = "granimals-auth-lambdas"
 register_user_lambda_s3_key    = "register_user.zip"
 change_password_lambda_s3_key  = "change_password.zip"
 delete_user_lambda_s3_key      = "delete_user.zip"
-unknown_user_lambda_s3_key     = "unknown_user.zip"
+login_lambda_s3_key     = "login.zip"
 insert_diet_plan_lambda_s3_key = "insert_diet_plan.zip"
 
 region         = "ap-south-1"

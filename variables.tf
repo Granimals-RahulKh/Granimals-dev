@@ -17,8 +17,8 @@ variable "register_user_lambda_s3_key" {
   type        = string
 }
 
-variable "unknown_user_lambda_s3_key" {
-  description = "S3 key (file path) for the unknown_user lambda zip"
+variable "login_lambda_s3_key" {
+  description = "S3 key (file path) for the login lambda zip"
   type        = string
 }
 

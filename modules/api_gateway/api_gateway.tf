@@ -82,26 +82,26 @@ resource "aws_api_gateway_integration" "delete_user_integration" {
 # -------------------------------------------------------------------
 # Unknown User
 # -------------------------------------------------------------------
-resource "aws_api_gateway_resource" "unknown_user" {
+resource "aws_api_gateway_resource" "login" {
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
   parent_id   = aws_api_gateway_rest_api.auth_api.root_resource_id
-  path_part   = "unknown_user"
+  path_part   = "login"
 }
 
-resource "aws_api_gateway_method" "unknown_user_any" {
+resource "aws_api_gateway_method" "login_any" {
   rest_api_id   = aws_api_gateway_rest_api.auth_api.id
-  resource_id   = aws_api_gateway_resource.unknown_user.id
+  resource_id   = aws_api_gateway_resource.login.id
   http_method   = "ANY"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "unknown_user_integration" {
+resource "aws_api_gateway_integration" "login_integration" {
   rest_api_id             = aws_api_gateway_rest_api.auth_api.id
-  resource_id             = aws_api_gateway_resource.unknown_user.id
-  http_method             = aws_api_gateway_method.unknown_user_any.http_method
+  resource_id             = aws_api_gateway_resource.login.id
+  http_method             = aws_api_gateway_method.login_any.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.unknown_user_lambda_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.login_lambda_arn}/invocations"
 }
 
 # -------------------------------------------------------------------
@@ -138,7 +138,7 @@ resource "aws_api_gateway_deployment" "auth_deployment" {
     aws_api_gateway_integration.register_user_integration,
     aws_api_gateway_integration.change_password_integration,
     aws_api_gateway_integration.delete_user_integration,
-    aws_api_gateway_integration.unknown_user_integration,
+    aws_api_gateway_integration.login_integration,
     aws_api_gateway_integration.insert_diet_plan_integration,
   ]
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
