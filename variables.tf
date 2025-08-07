@@ -105,11 +105,12 @@ variable "user_groups" {
 }
 
 variable "from_email" {
-  type    = string
-  default = null
+  type        = string
+  default     = "rahul.khandelwal@granimals.com"
 }
 
 variable "rds_secret_arn" {
   type    = string
   default = null
 }
+

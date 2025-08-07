@@ -16,9 +16,9 @@ tags = {
   Project     = "CognitoAuth"
 }
 
-user_pool_id        = "ap-south-1_R817Ubhm1"
-user_pool_arn       = "arn:aws:cognito-idp:ap-south-1:211125304405:userpool/ap-south-1_R817Ubhm1"
-user_pool_client_id = "27rcu1ciglglo6akfr1bmsghnf"
+user_pool_id        = "ap-south-1_Tph22WWlT"
+user_pool_arn       = "arn:aws:cognito-idp:ap-south-1:211125304405:userpool/ap-south-1_Tph22WWlT"
+user_pool_client_id = "517e4jbl197bs2ps3kmp8hgmcq"
 
 
 rds_secret_arn = "arn:aws:secretsmanager:ap-south-1:211125304405:secret:db-creds-tQqMII"
