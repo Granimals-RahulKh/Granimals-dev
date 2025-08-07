@@ -36,6 +36,7 @@ module "lambda_register_user" {
   api_gateway_arn     = module.api_gateway.api_gateway_arn
   api_gateway_paths   = ["register_user"]
   from_email          = var.from_email
+  layers              = [var.lambda_layer_arn]
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
@@ -53,6 +54,7 @@ module "lambda_delete_user" {
   api_gateway_arn     = module.api_gateway.api_gateway_arn
   api_gateway_paths   = ["delete_user"]
   from_email          = var.from_email
+  layers              = [var.lambda_layer_arn]
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
@@ -70,6 +72,7 @@ module "lambda_change_password" {
   api_gateway_arn     = module.api_gateway.api_gateway_arn
   api_gateway_paths   = ["change_password"]
   from_email          = var.from_email
+  layers              = [var.lambda_layer_arn]
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
@@ -88,6 +91,7 @@ module "lambda_login" {
   api_gateway_arn        = module.api_gateway.api_gateway_arn
   api_gateway_paths      = ["login"]
   from_email             = var.from_email
+  layers                 = [var.lambda_layer_arn]
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
@@ -101,6 +105,7 @@ module "lambda_insert_diet_plan" {
   api_gateway_arn     = module.api_gateway.api_gateway_arn
   api_gateway_paths   = ["insert_diet_plan"]
   rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
   #  DB_NAME             = var.db_name
   #  DB_HOST             = var.db_host
   #  DB_PORT             = var.db_port
@@ -118,6 +123,6 @@ module "api_gateway" {
   register_user_lambda_arn    = module.lambda_register_user.lambda_arn
   change_password_lambda_arn  = module.lambda_change_password.lambda_arn
   delete_user_lambda_arn      = module.lambda_delete_user.lambda_arn
-  login_lambda_arn     = module.lambda_login.lambda_arn
+  login_lambda_arn            = module.lambda_login.lambda_arn
   insert_diet_plan_lambda_arn = module.lambda_insert_diet_plan.lambda_arn
 }

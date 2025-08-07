@@ -105,8 +105,8 @@ variable "user_groups" {
 }
 
 variable "from_email" {
-  type        = string
-  default     = "rahul.khandelwal@granimals.com"
+  type    = string
+  default = "rahul.khandelwal@granimals.com"
 }
 
 variable "rds_secret_arn" {
@@ -114,3 +114,7 @@ variable "rds_secret_arn" {
   default = null
 }
 
+variable "lambda_layer_arn" {
+  description = "ARN of the Lambda layer to attach"
+  type        = string
+}
