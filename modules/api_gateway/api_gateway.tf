@@ -105,6 +105,32 @@ resource "aws_api_gateway_integration" "unknown_user_integration" {
 }
 
 # -------------------------------------------------------------------
+# Insert Diet Plan
+# -------------------------------------------------------------------
+resource "aws_api_gateway_resource" "insert_diet_plan" {
+  rest_api_id = aws_api_gateway_rest_api.auth_api.id
+  parent_id   = aws_api_gateway_rest_api.auth_api.root_resource_id
+  path_part   = "insert_diet_plan"
+}
+
+resource "aws_api_gateway_method" "insert_diet_plan_any" {
+  rest_api_id   = aws_api_gateway_rest_api.auth_api.id
+  resource_id   = aws_api_gateway_resource.insert_diet_plan.id
+  http_method   = "ANY"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "insert_diet_plan_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.auth_api.id
+  resource_id             = aws_api_gateway_resource.insert_diet_plan.id
+  http_method             = aws_api_gateway_method.insert_diet_plan_any.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.insert_diet_plan_lambda_arn}/invocations"
+}
+
+
+# -------------------------------------------------------------------
 # Updated Deployment to include all integrations
 # -------------------------------------------------------------------
 resource "aws_api_gateway_deployment" "auth_deployment" {
@@ -113,6 +139,7 @@ resource "aws_api_gateway_deployment" "auth_deployment" {
     aws_api_gateway_integration.change_password_integration,
     aws_api_gateway_integration.delete_user_integration,
     aws_api_gateway_integration.unknown_user_integration,
+    aws_api_gateway_integration.insert_diet_plan_integration,
   ]
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
   description = "Deployment for API Gateway"

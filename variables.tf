@@ -6,6 +6,12 @@ variable "region" {
   default     = "ap-south-1"
 }
 
+
+variable "insert_diet_plan_lambda_s3_key" {
+  description = "S3 key of the insert_diet_plan Lambda ZIP"
+  type        = string
+}
+
 variable "register_user_lambda_s3_key" {
   description = "S3 key (file path) for the register_user lambda zip"
   type        = string
@@ -68,23 +74,42 @@ variable "tags" {
   }
 }
 
-variable "from_email" {
-  description = "Verified email address in SES"
-  type        = string
-  default     = "rahul.khandelwal@granimals.com"
-}
+
+variable "db_host" {}
+variable "db_port" {}
+variable "db_name" {}
 
 variable "user_pool_id" {
-  description = "ID of the Cognito User Pool"
-  type        = string
-}
-
-variable "user_pool_arn" {
-  description = "ARN of the Cognito User Pool"
-  type        = string
+  type    = string
+  default = null
 }
 
 variable "user_pool_client_id" {
-  description = "Client ID of the Cognito User Pool"
-  type        = string
+  type    = string
+  default = null
+}
+
+variable "user_pool_arn" {
+  type    = string
+  default = null
+}
+
+variable "register_function_name" {
+  type    = string
+  default = null
+}
+
+variable "user_groups" {
+  type    = list(string)
+  default = []
+}
+
+variable "from_email" {
+  type    = string
+  default = null
+}
+
+variable "rds_secret_arn" {
+  type    = string
+  default = null
 }

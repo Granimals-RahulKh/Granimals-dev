@@ -58,17 +58,23 @@ resource "aws_lambda_function" "lambda_function" {
   role          = aws_iam_role.lambda_exec_role.arn
   s3_bucket     = var.lambda_s3_bucket
   s3_key        = var.lambda_function_key
+  timeout       = 900
 
   environment {
-    variables = {
-      USER_POOL_ID           = var.user_pool_id
-      USER_POOL_CLIENT_ID    = var.user_pool_client_id
-      USER_GROUPS            = join(",", var.user_groups)
-      REGISTER_FUNCTION_NAME = var.register_function_name
-      FROM_EMAIL             = var.from_email
-      #      SNS_TOPIC_ARN       = var.sns_topic_arn
-    }
+    variables = merge(
+      {
+        USER_POOL_ID           = var.user_pool_id
+        USER_POOL_CLIENT_ID    = var.user_pool_client_id
+        USER_GROUPS            = join(",", var.user_groups)
+        REGISTER_FUNCTION_NAME = var.register_function_name
+        FROM_EMAIL             = var.from_email
+      },
+      var.rds_secret_arn != null ? {
+        RDS_SECRET_ARN = var.rds_secret_arn
+      } : {}
+    )
   }
+
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic_execution,
@@ -146,8 +152,11 @@ resource "aws_iam_policy" "lambda_ses_send_email" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = "ses:SendEmail"
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
         Resource = "*"
       }
     ]
@@ -157,4 +166,27 @@ resource "aws_iam_policy" "lambda_ses_send_email" {
 resource "aws_iam_role_policy_attachment" "lambda_ses_attach" {
   role       = aws_iam_role.lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_ses_send_email.arn
+}
+
+
+resource "aws_iam_policy" "lambda_secretsmanager_policy" {
+  count = var.rds_secret_arn == null ? 0 : 1
+  name  = "${var.lambda_name}_secretsmanager_access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = ["secretsmanager:GetSecretValue"],
+        Resource = var.rds_secret_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_secretsmanager_attach" {
+  count      = var.rds_secret_arn == null ? 0 : 1
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_secretsmanager_policy[0].arn
 }

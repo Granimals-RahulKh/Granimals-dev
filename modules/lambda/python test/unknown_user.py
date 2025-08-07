@@ -250,3 +250,185 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': str(e)})
         }
+##---------------------------------------------------------##
+##                     insert_diet_plan.py                 ##
+##---------------------------------------------------------##
+import boto3
+import json
+import os
+import psycopg2
+import traceback
+
+# def get_db_credentials(secret_arn):
+#     client = boto3.client('secretsmanager')
+#     response = client.get_secret_value(SecretId=secret_arn)
+#     secret = json.loads(response['SecretString'])
+#     return secret
+
+def lambda_handler(event, context):
+    try:
+        print("Parsing request body...")
+        body = json.loads(event.get('body', '{}'))
+        print("Parsed body:", body)
+
+        creds = {
+            "host": "granimals-dev-cluster-1.cr82g6co4rta.ap-south-1.rds.amazonaws.com",
+            "port": 5432,
+            "dbname": "granimalsdev",
+            "username": "granimals_rds",
+            "password": "rdsSecret#1"
+        }
+
+        print("Connecting to DB...")
+        conn = psycopg2.connect(
+            host=creds['host'],
+            port=creds['port'],
+            dbname=creds['dbname'],
+            user=creds['username'],
+            password=creds['password']
+        )
+        cursor = conn.cursor()
+        print("Connected to DB")
+
+        if 'diet_plan_id' in body:
+            print("Starting insert for diet_plan:", body['diet_plan_id'])
+            insert_diet_plan(cursor, body)
+        else:
+            print("No diet_plan_id found in the body")
+
+        conn.commit()
+        print("Transaction committed")
+
+        cursor.close()
+        conn.close()
+        print("Connection closed")
+
+        return {
+            "statusCode": 200,
+            "body": json.dumps({"message": "Data inserted successfully"})
+        }
+
+    except Exception as e:
+        print("Exception occurred:", str(e))
+        traceback.print_exc()
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)})
+        }
+
+
+def insert_diet_plan(cursor, data):
+    print("Inserting into diet_plans...")
+    cursor.execute("""
+        INSERT INTO diet_plans (diet_plan_id, category, support_staff_id)
+        VALUES (%s, %s, %s)
+    """, (data['diet_plan_id'], data['category'], data['support_staff_id']))
+
+    for week in data.get('weeks', []):
+        print("Processing week:", week['diet_week_id'])
+        insert_diet_week(cursor, data['diet_plan_id'], week)
+
+
+def insert_diet_week(cursor, diet_plan_id, week):
+    print("Inserting into diet_weeks...")
+    cursor.execute("""
+        INSERT INTO diet_weeks (diet_week_id, diet_plan_id, week_number)
+        VALUES (%s, %s, %s)
+    """, (week['diet_week_id'], diet_plan_id, week['week_number']))
+
+    for day in week.get('days', []):
+        print("Processing day:", day['diet_day_id'])
+        insert_diet_day(cursor, week['diet_week_id'], day)
+
+
+def insert_diet_day(cursor, diet_week_id, day):
+    print("Inserting into diet_days...")
+    cursor.execute("""
+        INSERT INTO diet_days (diet_day_id, diet_week_id, diet_day_name, date_assigned)
+        VALUES (%s, %s, %s, %s)
+    """, (day['diet_day_id'], diet_week_id, day['diet_day_name'], day['date_assigned']))
+
+    for meal in day.get('meals', []):
+        print("Processing meal:", meal.get('meal_id'))
+        insert_diet_meal(cursor, day['diet_day_id'], meal)
+
+
+def insert_diet_meal(cursor, diet_day_id, meal):
+    print("Inserting into diet_meals...")
+    cursor.execute("""
+        INSERT INTO diet_meals (
+            diet_day_id, meal_type, meal_id, meal_name,
+            calories, proteins, fibers, fats,
+            time_of_meal, status, notes
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        diet_day_id,
+        meal.get('meal_type'),
+        meal.get('meal_id'),
+        meal.get('meal_name'),
+        meal.get('calories'),
+        meal.get('proteins'),
+        meal.get('Fibers') or meal.get('fibers'),
+        meal.get('fats'),
+        meal.get('time_of_meal'),
+        meal.get('status'),
+        json.dumps(meal.get('notes', []))
+    ))
+##---------------------------------------------------------##
+##                     insert_diet_plan.json               ##
+##---------------------------------------------------------##
+{
+  "body": "{\n  \"diet_plan_id\": \"c73b88a3-5705-4aa3-8b38-76884937b15d\",\n  \"category\": \"custom\",\n  \"support_staff_id\": \"ac9e3811-78d4-4c10-b835-eede5f62cd5b\",\n  \"weeks\": [\n    {\n      \"diet_week_id\": \"9c3f6dd2-06e3-4ac5-bafe-1b781fe6a111\",\n      \"week_number\": 1,\n      \"days\": [\n        {\n          \"diet_day_id\": \"c289d7f3-2d6d-4b3f-889e-f3dcd66c96f2\",\n          \"diet_day_name\": \"monday\",\n          \"date_assigned\": \"2025-05-26\",\n          \"meals\": [\n            {\n              \"meal_type\": \"breakfast\",\n              \"meal_id\": \"dish001\",\n              \"meal_name\": \"Oats\",\n              \"time_of_meal\": \"08:00\",\n              \"status\": \"not complete\",\n              \"notes\": [\"high fiber\"]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+}
+
+##---------------------------------------------------------##
+##                     creating tables query               ##
+##---------------------------------------------------------##
+CREATE TABLE diet_plans (
+    diet_plan_id UUID PRIMARY KEY,
+    category TEXT,
+    support_staff_id UUID
+);
+
+CREATE TABLE diet_weeks (
+    diet_week_id UUID PRIMARY KEY,
+    diet_plan_id UUID REFERENCES diet_plans(diet_plan_id),
+    week_number INT
+);
+
+CREATE TABLE diet_days (
+    diet_day_id UUID PRIMARY KEY,
+    diet_week_id UUID REFERENCES diet_weeks(diet_week_id),
+    diet_day_name TEXT,
+    date_assigned DATE
+);
+
+CREATE TABLE diet_meals (
+    id SERIAL PRIMARY KEY,
+    diet_day_id UUID REFERENCES diet_days(diet_day_id),
+    meal_type TEXT,
+    meal_id TEXT,
+    meal_name TEXT,
+    calories TEXT,
+    proteins TEXT,
+    fibers TEXT,
+    fats TEXT,
+    time_of_meal TEXT,
+    status TEXT,
+    notes JSONB
+);
+##---------------------------------------------------------##
+##            Quick Pritunl Install Commands               ##
+##---------------------------------------------------------##
+sudo apt update && sudo apt install -y curl gnupg
+curl -fsSL https://pgp.mongodb.com/server-6.0.asc | \
+  sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | \
+  sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+echo "deb https://repo.pritunl.com/stable/apt jammy main" | \
+  sudo tee /etc/apt/sources.list.d/pritunl.list
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv-keys 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+sudo apt update
+sudo apt install -y mongodb-org pritunl
+sudo systemctl enable mongod pritunl
+sudo systemctl start mongod pritunl

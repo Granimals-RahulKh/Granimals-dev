@@ -46,3 +46,8 @@ variable "unknown_user_lambda_arn" {
   description = "ARN of the unknown_user Lambda function"
   type        = string
 }
+
+variable "insert_diet_plan_lambda_arn" {
+  description = "ARN of the insert_diet_plan Lambda function"
+  type        = string
+}
