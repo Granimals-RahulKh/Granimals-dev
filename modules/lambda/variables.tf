@@ -48,8 +48,8 @@ variable "register_function_name" {
 }
 
 variable "from_email" {
-  type        = string
-  default     = "rahul.khandelwal@granimals.com"
+  type    = string
+  default = "rahul.khandelwal@granimals.com"
 }
 
 #variable "sns_topic_arn" {
@@ -74,4 +74,10 @@ variable "db_host" {
 
 variable "db_port" {
   default = null
+}
+
+variable "layers" {
+  description = "List of Lambda layer ARNs to attach"
+  type        = list(string)
+  default     = []
 }

@@ -59,6 +59,8 @@ resource "aws_lambda_function" "lambda_function" {
   s3_bucket     = var.lambda_s3_bucket
   s3_key        = var.lambda_function_key
   timeout       = 900
+  layers        = var.layers
+
 
   environment {
     variables = merge(
