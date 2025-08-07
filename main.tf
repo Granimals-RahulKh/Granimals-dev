@@ -91,6 +91,21 @@ module "lambda_unknown_user" {
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
+module "lambda_insert_diet_plan" {
+  source              = "./modules/lambda"
+  lambda_name         = "insert_diet_plan"
+  handler             = "insert_diet_plan.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.insert_diet_plan_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["insert_diet_plan"]
+  rds_secret_arn      = var.rds_secret_arn
+  #  DB_NAME             = var.db_name
+  #  DB_HOST             = var.db_host
+  #  DB_PORT             = var.db_port
+}
+
 # API Gateway for exposing the Lambda functions
 module "api_gateway" {
   source          = "./modules/api_gateway"
@@ -100,8 +115,9 @@ module "api_gateway" {
   api_stage_name  = "dev"
   tags            = var.tags
 
-  register_user_lambda_arn   = module.lambda_register_user.lambda_arn
-  change_password_lambda_arn = module.lambda_change_password.lambda_arn
-  delete_user_lambda_arn     = module.lambda_delete_user.lambda_arn
-  unknown_user_lambda_arn    = module.lambda_unknown_user.lambda_arn
+  register_user_lambda_arn    = module.lambda_register_user.lambda_arn
+  change_password_lambda_arn  = module.lambda_change_password.lambda_arn
+  delete_user_lambda_arn      = module.lambda_delete_user.lambda_arn
+  unknown_user_lambda_arn     = module.lambda_unknown_user.lambda_arn
+  insert_diet_plan_lambda_arn = module.lambda_insert_diet_plan.lambda_arn
 }

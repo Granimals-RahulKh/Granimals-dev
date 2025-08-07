@@ -8,22 +8,21 @@ variable "lambda_s3_bucket" {
 variable "user_pool_id" {
   type        = string
   description = "Cognito User Pool ID"
+  default     = null
 }
 variable "lambda_name" {
   description = "Name of the Lambda function"
   type        = string
 }
 
-#variable "s3_key" {
-#  description = "S3 object key of the Lambda zip file"
-#  type        = string
-#}
 variable "user_pool_arn" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "user_pool_client_id" {
-  type = string
+  type    = string
+  default = null
 }
 variable "lambda_function_key" {
   type = string
@@ -57,4 +56,23 @@ variable "from_email" {
   description = "Verified SES email address used as sender"
   type        = string
   default     = "rahul.khandelwal@granimals.com"
+}
+
+
+variable "rds_secret_arn" {
+  description = "Secret ARN for RDS credentials"
+  type        = string
+  default     = null
+}
+
+variable "db_name" {
+  default = null
+}
+
+variable "db_host" {
+  default = null
+}
+
+variable "db_port" {
+  default = null
 }
