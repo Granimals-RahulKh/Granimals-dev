@@ -1,79 +1,85 @@
 ##---------------------------------------------------------##
 ##                     register_user.py                    ##
 ##---------------------------------------------------------##
-import os
-import boto3
 import json
+import boto3
+import os
+import secrets
+import string
 
 cognito_idp = boto3.client('cognito-idp')
+ses_client = boto3.client('ses')
+USER_POOL_ID = os.environ['USER_POOL_ID']
+FROM_EMAIL = os.environ['FROM_EMAIL']
+
+def generate_secure_password(length=12):
+    chars = string.ascii_letters + string.digits + "!@#$%^&*()"
+    return ''.join(secrets.choice(chars) for _ in range(length))
 
 def lambda_handler(event, context):
-    user_pool_id = os.environ.get('USER_POOL_ID')
-    username = event.get('username')        # Example: "rahul.k@iamops.io"
-    temporary_password = event.get('password', 'TempPass123!')
-    group_name = event.get('group')         # e.g., "admin", "support", "customer"
-
     try:
         body = json.loads(event.get('body', '{}'))
-    except json.JSONDecodeError:
-        return {
-            'statusCode': 400,
-            'body': 'Invalid JSON format'
-        }
+        username = body.get('username')
+        group = body.get('group')
 
-    username = body.get('username')
-    temporary_password = body.get('password', 'TempPass123!')
-    group_name = body.get('group')
-    
-    
-    # Validate input
-    if not user_pool_id:
-        return {
-            'statusCode': 500,
-            'body': 'Missing USER_POOL_ID environment variable'
-        }
-    
-    if not username or not group_name:
-        return {
-            'statusCode': 400,
-            'body': 'Missing "username" or "group" in the request'
-        }
+        if not username or not group:
+            return {"statusCode": 400, "body": json.dumps("Missing 'username' or 'group' in the request")}
 
-    try:
-        # Step 1: Create the user
+        # Generate secure temporary password
+        temp_password = generate_secure_password()
+
+        # Create the user with suppressed message
         cognito_idp.admin_create_user(
-            UserPoolId=user_pool_id,
+            UserPoolId=USER_POOL_ID,
             Username=username,
-            TemporaryPassword=temporary_password,
+            TemporaryPassword=temp_password,
             UserAttributes=[
-                {'Name': 'email', 'Value': username},
-                {'Name': 'email_verified', 'Value': 'true'}
+                {"Name": "email", "Value": username},
+                {"Name": "email_verified", "Value": "true"}
             ],
-            MessageAction='SUPPRESS'  # Suppress default email notification
+            MessageAction='SUPPRESS'
         )
-        print(f"✅ User {username} created successfully")
 
-        # Step 2: Add the user to the dynamic group
+        # Add user to the specified group
         cognito_idp.admin_add_user_to_group(
-            UserPoolId=user_pool_id,
+            UserPoolId=USER_POOL_ID,
             Username=username,
-            GroupName=group_name
+            GroupName=group
         )
-        print(f"✅ User {username} added to group {group_name}")
+
+        # Send welcome email with credentials
+        email_subject = "Welcome to the Platform – Your Account Details"
+        email_body = (
+            f"Dear User,\n\n"
+            f"Your account has been successfully created and added to the group '{group}'.\n\n"
+            f"Login Credentials:\n"
+            f"Email: {username}\n"
+            f"Temporary Password: {temp_password}\n\n"
+            f"Please log in and change your password at your earliest convenience.\n"
+            f"For security, do not share these credentials with anyone.\n\n"
+            f"Regards,\n"
+            f"Support Team"
+        )
+
+        ses_client.send_email(
+            Source=FROM_EMAIL,
+            Destination={'ToAddresses': [username]},
+            Message={
+                'Subject': {'Data': email_subject},
+                'Body': {'Text': {'Data': email_body}}
+            }
+        )
 
         return {
-            'statusCode': 200,
-            'body': f"User '{username}' created and added to group '{group_name}'"
+            "statusCode": 200,
+            "body": json.dumps(f"User '{username}' registered and email sent successfully")
         }
 
     except Exception as e:
-        print(f"❌ Error: {e}")
         return {
-            'statusCode': 500,
-            'body': f"Error: {str(e)}"
+            "statusCode": 500,
+            "body": json.dumps(str(e))
         }
-
-
 ##---------------------------------------------------------##
 ##                     delete_user.py                      ##
 ##---------------------------------------------------------##
@@ -123,13 +129,26 @@ def lambda_handler(event, context):
 import os
 import json
 import boto3
+from botocore.exceptions import ClientError
+import hmac
+import hashlib
+import base64
 
-cognito_idp = boto3.client('cognito-idp')
-lambda_client = boto3.client('lambda')
+def get_secret_hash(username, client_id, client_secret):
+    message = username + client_id
+    dig = hmac.new(
+        client_secret.encode('utf-8'),
+        msg=message.encode('utf-8'),
+        digestmod=hashlib.sha256
+    ).digest()
+    return base64.b64encode(dig).decode()
+
+cognito_idp = boto3.client('cognito-idp', region_name='ap-south-1')
 
 def lambda_handler(event, context):
     user_pool_id = os.environ.get('USER_POOL_ID')
-    register_function_name = os.environ.get('REGISTER_FUNCTION_NAME')
+    client_id = os.environ.get('USER_POOL_CLIENT_ID')
+    client_secret = os.environ.get('CLIENT_SECRET')  # ✅ New addition
 
     # Parse JSON body if coming from API Gateway
     if isinstance(event, dict) and "body" in event:
@@ -142,113 +161,170 @@ def lambda_handler(event, context):
             }
 
     username = event.get('username')
-    password = event.get('password', 'TempPass123!')
-    group = event.get('group', 'user')
+    password = event.get('password')
 
-    if not user_pool_id or not username or not group:
+    if not user_pool_id or not client_id or not username or not password:
         return {
             'statusCode': 400,
-            'body': json.dumps({"message": 'Missing "username" or "group" in the request'})
+            'body': json.dumps({"message": 'Missing "username" or "password" in the request'})
         }
 
+    # Step 1: Check if user exists
     try:
-        # Register the user
-        cognito_idp.admin_create_user(
+        cognito_idp.admin_get_user(
             UserPoolId=user_pool_id,
-            Username=username,
-            TemporaryPassword=password,
-            UserAttributes=[
-                {'Name': 'email', 'Value': username},
-                {'Name': 'email_verified', 'Value': 'True'}
-            ],
-            MessageAction='SUPPRESS'  # Do not send welcome email
+            Username=username
+        )
+    except cognito_idp.exceptions.UserNotFoundException:
+        return {
+            'statusCode': 404,
+            'body': json.dumps({"message": "failure!"})
+        }
+    except ClientError as e:
+        print(f"❌ Error checking user: {e.response['Error']['Message']}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                "message": f"Internal error checking user existence: {e.response['Error']['Message']}"
+            })
+        }
+
+    # Step 2: Try authenticating user
+    try:
+        auth_params = {
+            'USERNAME': username,
+            'PASSWORD': password
+        }
+
+        # ✅ Add SECRET_HASH if client_secret is provided
+        if client_secret:
+            auth_params['SECRET_HASH'] = get_secret_hash(username, client_id, client_secret)
+
+        auth_response = cognito_idp.initiate_auth(
+            ClientId=client_id,
+            AuthFlow='USER_PASSWORD_AUTH',
+            AuthParameters=auth_params
         )
 
-        # Set a permanent password
-        cognito_idp.admin_set_user_password(
+        # Step 3: Get group
+        group_response = cognito_idp.admin_list_groups_for_user(
             UserPoolId=user_pool_id,
-            Username=username,
-            Password=password,
-            Permanent=True
+            Username=username
         )
-
-        # Add user to group
-        cognito_idp.admin_add_user_to_group(
-            UserPoolId=user_pool_id,
-            Username=username,
-            GroupName=group
-        )
-
-        # Optional: Trigger another Lambda if required (for chaining logic)
-        if register_function_name:
-            lambda_client.invoke(
-                FunctionName=register_function_name,
-                InvocationType='Event',
-                Payload=json.dumps({
-                    "action": "registered",
-                    "username": username
-                }).encode()
-            )
+        groups = group_response.get("Groups", [])
+        group_name = groups[0]["GroupName"] if groups else "user"
 
         return {
             'statusCode': 200,
-            'body': json.dumps({"message": f"User '{username}' registered successfully"})
+            'body': json.dumps({
+                "message": "success!",
+                "group": group_name
+            })
         }
 
-    except Exception as e:
-        print(f"❌ Registration error: {e}")
+    except cognito_idp.exceptions.NotAuthorizedException:
+        return {
+            'statusCode': 401,
+            'body': json.dumps({"message": "Incorrect username or password. Please try again."})
+        }
+
+    except cognito_idp.exceptions.UserNotConfirmedException:
+        return {
+            'statusCode': 403,
+            'body': json.dumps({"message": "User not confirmed. Please verify your email before logging in."})
+        }
+
+    except ClientError as e:
+        print(f"❌ Login error: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({"message": f"Internal server error: {str(e)}"})
+            'body': json.dumps({"message": "An unexpected error occurred during login."})
         }
 ##---------------------------------------------------------##
 ##                     change_password.py                  ##
 ##---------------------------------------------------------##
-import os
-import boto3
 import json
+import boto3
+import os
+import secrets
+import string
 
 cognito_idp = boto3.client('cognito-idp')
+ses_client = boto3.client('ses')
+
+USER_POOL_ID = os.environ['USER_POOL_ID']
+FROM_EMAIL = os.environ['FROM_EMAIL']
+
+def generate_secure_password(length=12):
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*()-_=+"
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 def lambda_handler(event, context):
-    user_pool_id = os.environ.get('USER_POOL_ID')
-
-    # Ensure body is parsed from API Gateway JSON payload
     try:
         body = json.loads(event.get('body', '{}'))
-    except Exception as e:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid JSON in request body'})
-        }
+        email = body.get('username')  # consistent naming
 
-    username = body.get('username')
-    new_password = body.get('new_password')
+        if not email:
+            return {
+                "statusCode": 400,
+                "body": json.dumps("Missing 'username' (email) in the request")
+            }
 
-    if not user_pool_id or not username or not new_password:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Missing USER_POOL_ID, username, or new_password'})
-        }
+        # Check if the user exists in Cognito
+        try:
+            cognito_idp.admin_get_user(
+                UserPoolId=USER_POOL_ID,
+                Username=email
+            )
+        except cognito_idp.exceptions.UserNotFoundException:
+            return {
+                "statusCode": 404,
+                "body": json.dumps(f"No user found with username/email: {email}")
+            }
 
-    try:
+        # Generate new secure password
+        new_password = generate_secure_password()
+
+        # Set the new password
         cognito_idp.admin_set_user_password(
-            UserPoolId=user_pool_id,
-            Username=username,
+            UserPoolId=USER_POOL_ID,
+            Username=email,
             Password=new_password,
             Permanent=True
         )
-        print(f"✅ Password updated for user {username}")
+
+        # Send email via SES
+        email_subject = "Your Password Has Been Reset"
+        email_body = (
+            f"Dear User,\n\n"
+            f"Your password has been successfully reset.\n\n"
+            f"Username: {email}\n"
+            f"New Password: {new_password}\n\n"
+            f"Please log in and change this password immediately.\n"
+            f"Keep this information secure and do not share it with anyone.\n\n"
+            f"Regards,\nSupport Team"
+        )
+
+        ses_client.send_email(
+            Source=FROM_EMAIL,
+            Destination={'ToAddresses': [email]},
+            Message={
+                'Subject': {'Data': email_subject},
+                'Body': {
+                    'Text': {'Data': email_body}
+                }
+            }
+        )
+
         return {
-            'statusCode': 200,
-            'body': json.dumps({'message': f"Password for user '{username}' changed successfully"})
+            "statusCode": 200,
+            "body": json.dumps(f"New password has been set and emailed to {email}")
         }
 
     except Exception as e:
-        print(f"❌ Error changing password: {e}")
         return {
-            'statusCode': 500,
-            'body': json.dumps({'error': str(e)})
+            "statusCode": 500,
+            "body": json.dumps(str(e))
         }
 ##---------------------------------------------------------##
 ##                     insert_diet_plan.py                 ##

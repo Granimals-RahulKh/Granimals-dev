@@ -81,3 +81,8 @@ variable "layers" {
   type        = list(string)
   default     = []
 }
+variable "user_pool_client_secret" {
+  description = "Client secret for Cognito User Pool"
+  type        = string
+  sensitive   = true
+}

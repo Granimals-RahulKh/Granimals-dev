@@ -70,6 +70,8 @@ resource "aws_lambda_function" "lambda_function" {
         USER_GROUPS            = join(",", var.user_groups)
         REGISTER_FUNCTION_NAME = var.register_function_name
         FROM_EMAIL             = var.from_email
+        CLIENT_SECRET          = var.user_pool_client_secret
+
       },
       var.rds_secret_arn != null ? {
         RDS_SECRET_ARN = var.rds_secret_arn
