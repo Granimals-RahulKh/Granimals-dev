@@ -23,89 +23,94 @@ locals {
 
 
 module "lambda_register_user" {
-  source              = "./modules/lambda"
-  lambda_name         = "register_user"
-  handler             = "register_user.lambda_handler"
-  runtime             = "python3.12"
-  user_pool_id        = var.user_pool_id
-  user_pool_arn       = var.user_pool_arn
-  user_pool_client_id = var.user_pool_client_id
-  lambda_s3_bucket    = var.lambda_s3_bucket
-  lambda_function_key = var.register_user_lambda_s3_key
-  user_groups         = local.user_groups
-  api_gateway_arn     = module.api_gateway.api_gateway_arn
-  api_gateway_paths   = ["register_user"]
-  from_email          = var.from_email
-  layers              = [var.lambda_layer_arn]
+  source                  = "./modules/lambda"
+  lambda_name             = "register_user"
+  handler                 = "register_user.lambda_handler"
+  runtime                 = "python3.12"
+  user_pool_id            = var.user_pool_id
+  user_pool_arn           = var.user_pool_arn
+  user_pool_client_id     = var.user_pool_client_id
+  lambda_s3_bucket        = var.lambda_s3_bucket
+  lambda_function_key     = var.register_user_lambda_s3_key
+  user_groups             = local.user_groups
+  api_gateway_arn         = module.api_gateway.api_gateway_arn
+  api_gateway_paths       = ["register_user"]
+  from_email              = var.from_email
+  layers                  = [var.lambda_layer_arn]
+  user_pool_client_secret = var.user_pool_client_secret
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
 module "lambda_delete_user" {
-  source              = "./modules/lambda"
-  lambda_name         = "delete_user"
-  handler             = "delete_user.lambda_handler"
-  runtime             = "python3.12"
-  user_pool_id        = var.user_pool_id
-  user_pool_arn       = var.user_pool_arn
-  user_pool_client_id = var.user_pool_client_id
-  lambda_s3_bucket    = var.lambda_s3_bucket
-  lambda_function_key = var.delete_user_lambda_s3_key
-  user_groups         = local.user_groups
-  api_gateway_arn     = module.api_gateway.api_gateway_arn
-  api_gateway_paths   = ["delete_user"]
-  from_email          = var.from_email
-  layers              = [var.lambda_layer_arn]
+  source                  = "./modules/lambda"
+  lambda_name             = "delete_user"
+  handler                 = "delete_user.lambda_handler"
+  runtime                 = "python3.12"
+  user_pool_id            = var.user_pool_id
+  user_pool_arn           = var.user_pool_arn
+  user_pool_client_id     = var.user_pool_client_id
+  lambda_s3_bucket        = var.lambda_s3_bucket
+  lambda_function_key     = var.delete_user_lambda_s3_key
+  user_groups             = local.user_groups
+  api_gateway_arn         = module.api_gateway.api_gateway_arn
+  api_gateway_paths       = ["delete_user"]
+  from_email              = var.from_email
+  layers                  = [var.lambda_layer_arn]
+  user_pool_client_secret = var.user_pool_client_secret
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
 module "lambda_change_password" {
-  source              = "./modules/lambda"
-  lambda_name         = "change_password"
-  handler             = "change_password.lambda_handler"
-  runtime             = "python3.12"
-  user_pool_id        = var.user_pool_id
-  user_pool_arn       = var.user_pool_arn
-  user_pool_client_id = var.user_pool_client_id
-  lambda_s3_bucket    = var.lambda_s3_bucket
-  lambda_function_key = var.change_password_lambda_s3_key
-  user_groups         = local.user_groups
-  api_gateway_arn     = module.api_gateway.api_gateway_arn
-  api_gateway_paths   = ["change_password"]
-  from_email          = var.from_email
-  layers              = [var.lambda_layer_arn]
+  source                  = "./modules/lambda"
+  lambda_name             = "change_password"
+  handler                 = "change_password.lambda_handler"
+  runtime                 = "python3.12"
+  user_pool_id            = var.user_pool_id
+  user_pool_arn           = var.user_pool_arn
+  user_pool_client_id     = var.user_pool_client_id
+  lambda_s3_bucket        = var.lambda_s3_bucket
+  lambda_function_key     = var.change_password_lambda_s3_key
+  user_groups             = local.user_groups
+  api_gateway_arn         = module.api_gateway.api_gateway_arn
+  api_gateway_paths       = ["change_password"]
+  from_email              = var.from_email
+  layers                  = [var.lambda_layer_arn]
+  user_pool_client_secret = var.user_pool_client_secret
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
 module "lambda_login" {
-  source                 = "./modules/lambda"
-  lambda_name            = "login"
-  handler                = "login.lambda_handler"
-  runtime                = "python3.12"
-  user_pool_id           = var.user_pool_id
-  user_pool_arn          = var.user_pool_arn
-  user_pool_client_id    = var.user_pool_client_id
-  register_function_name = module.lambda_register_user.lambda_function_name
-  lambda_s3_bucket       = var.lambda_s3_bucket
-  lambda_function_key    = var.login_lambda_s3_key
-  user_groups            = local.user_groups
-  api_gateway_arn        = module.api_gateway.api_gateway_arn
-  api_gateway_paths      = ["login"]
-  from_email             = var.from_email
-  layers                 = [var.lambda_layer_arn]
+  source                  = "./modules/lambda"
+  lambda_name             = "login"
+  handler                 = "login.lambda_handler"
+  runtime                 = "python3.12"
+  user_pool_id            = var.user_pool_id
+  user_pool_arn           = var.user_pool_arn
+  user_pool_client_id     = var.user_pool_client_id
+  register_function_name  = module.lambda_register_user.lambda_function_name
+  lambda_s3_bucket        = var.lambda_s3_bucket
+  lambda_function_key     = var.login_lambda_s3_key
+  user_groups             = local.user_groups
+  api_gateway_arn         = module.api_gateway.api_gateway_arn
+  api_gateway_paths       = ["login"]
+  from_email              = var.from_email
+  layers                  = [var.lambda_layer_arn]
+  user_pool_client_secret = var.user_pool_client_secret
   #  sns_topic_arn       = module.sns.sns_topic_arn
 }
 
 module "lambda_insert_diet_plan" {
-  source              = "./modules/lambda"
-  lambda_name         = "insert_diet_plan"
-  handler             = "insert_diet_plan.lambda_handler"
-  runtime             = "python3.12"
-  lambda_s3_bucket    = var.lambda_s3_bucket
-  lambda_function_key = var.insert_diet_plan_lambda_s3_key
-  api_gateway_arn     = module.api_gateway.api_gateway_arn
-  api_gateway_paths   = ["insert_diet_plan"]
-  rds_secret_arn      = var.rds_secret_arn
-  layers              = [var.lambda_layer_arn]
+  source                  = "./modules/lambda"
+  lambda_name             = "insert_diet_plan"
+  handler                 = "insert_diet_plan.lambda_handler"
+  runtime                 = "python3.12"
+  lambda_s3_bucket        = var.lambda_s3_bucket
+  lambda_function_key     = var.insert_diet_plan_lambda_s3_key
+  api_gateway_arn         = module.api_gateway.api_gateway_arn
+  api_gateway_paths       = ["insert_diet_plan"]
+  rds_secret_arn          = var.rds_secret_arn
+  layers                  = [var.lambda_layer_arn]
+  user_pool_client_secret = var.user_pool_client_secret
   #  DB_NAME             = var.db_name
   #  DB_HOST             = var.db_host
   #  DB_PORT             = var.db_port

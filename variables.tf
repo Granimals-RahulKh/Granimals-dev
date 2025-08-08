@@ -118,3 +118,9 @@ variable "lambda_layer_arn" {
   description = "ARN of the Lambda layer to attach"
   type        = string
 }
+variable "user_pool_client_secret" {
+  description = "Client secret for Cognito User Pool"
+  type        = string
+  sensitive   = true
+  default     = null
+}
