@@ -116,6 +116,46 @@ module "lambda_insert_diet_plan" {
   #  DB_PORT             = var.db_port
 }
 
+module "lambda_push_data_to_rds" {
+  source              = "./modules/lambda"
+  lambda_name         = "push_data_to_rds"
+  handler             = "push_data_to_rds.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.push_data_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["push_data_to_rds"]
+  rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
+
+  # DB connection details for schema-aware queries
+  environment_variables = {
+    DB_HOST = var.db_host
+    DB_PORT = var.db_port
+    DB_NAME = var.db_name
+  }
+}
+
+module "lambda_pull_data_from_rds" {
+  source              = "./modules/lambda"
+  lambda_name         = "pull_data_from_rds"
+  handler             = "pull_data_from_rds.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.pull_data_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["pull_data_from_rds"]
+  rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
+
+  environment_variables = {
+    DB_HOST = var.db_host
+    DB_PORT = var.db_port
+    DB_NAME = var.db_name
+  }
+}
+
+
 # API Gateway for exposing the Lambda functions
 module "api_gateway" {
   source          = "./modules/api_gateway"
@@ -124,6 +164,7 @@ module "api_gateway" {
   api_description = "API for Cognito auth Lambda functions"
   api_stage_name  = "dev"
   tags            = var.tags
+  user_pool_arn   = var.user_pool_arn
 
   register_user_lambda_arn    = module.lambda_register_user.lambda_arn
   change_password_lambda_arn  = module.lambda_change_password.lambda_arn

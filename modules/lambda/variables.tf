@@ -86,3 +86,8 @@ variable "user_pool_client_secret" {
   type        = string
   sensitive   = true
 }
+variable "environment_variables" {
+  type        = map(string)
+  description = "Extra environment variables for the Lambda function"
+  default     = null
+}
