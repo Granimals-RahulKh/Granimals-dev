@@ -42,7 +42,8 @@ resource "aws_api_gateway_method" "change_password_any" {
   rest_api_id   = aws_api_gateway_rest_api.auth_api.id
   resource_id   = aws_api_gateway_resource.change_password.id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
 }
 
 resource "aws_api_gateway_integration" "change_password_integration" {
@@ -67,7 +68,8 @@ resource "aws_api_gateway_method" "delete_user_any" {
   rest_api_id   = aws_api_gateway_rest_api.auth_api.id
   resource_id   = aws_api_gateway_resource.delete_user.id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
 }
 
 resource "aws_api_gateway_integration" "delete_user_integration" {
@@ -80,7 +82,7 @@ resource "aws_api_gateway_integration" "delete_user_integration" {
 }
 
 # -------------------------------------------------------------------
-# Unknown User
+# Login
 # -------------------------------------------------------------------
 resource "aws_api_gateway_resource" "login" {
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
@@ -117,7 +119,8 @@ resource "aws_api_gateway_method" "insert_diet_plan_any" {
   rest_api_id   = aws_api_gateway_rest_api.auth_api.id
   resource_id   = aws_api_gateway_resource.insert_diet_plan.id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
 }
 
 resource "aws_api_gateway_integration" "insert_diet_plan_integration" {
@@ -157,4 +160,12 @@ resource "aws_api_gateway_stage" "auth_stage" {
   stage_name    = var.api_stage_name
   rest_api_id   = aws_api_gateway_rest_api.auth_api.id
   deployment_id = aws_api_gateway_deployment.auth_deployment.id
+}
+
+resource "aws_api_gateway_authorizer" "cognito_auth" {
+  name            = "granimals-cognito-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.auth_api.id
+  identity_source = "method.request.header.Authorization"
+  type            = "COGNITO_USER_POOLS"
+  provider_arns   = [var.user_pool_arn]
 }

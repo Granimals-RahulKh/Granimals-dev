@@ -51,3 +51,7 @@ variable "insert_diet_plan_lambda_arn" {
   description = "ARN of the insert_diet_plan Lambda function"
   type        = string
 }
+variable "user_pool_arn" {
+  description = "ARN of the Cognito user pool"
+  type        = string
+}

@@ -20,22 +20,27 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get('body', '{}'))
         username = body.get('username')
+        name = body.get('name')  # Get the name from the request
         group = body.get('group')
 
-        if not username or not group:
-            return {"statusCode": 400, "body": json.dumps("Missing 'username' or 'group' in the request")}
+        if not username or not group or not name:
+            return {
+                "statusCode": 400,
+                "body": json.dumps("Missing 'username', 'name', or 'group' in the request")
+            }
 
         # Generate secure temporary password
         temp_password = generate_secure_password()
 
-        # Create the user with suppressed message
+        # Create the user with suppressed email
         cognito_idp.admin_create_user(
             UserPoolId=USER_POOL_ID,
             Username=username,
             TemporaryPassword=temp_password,
             UserAttributes=[
                 {"Name": "email", "Value": username},
-                {"Name": "email_verified", "Value": "true"}
+                {"Name": "email_verified", "Value": "true"},
+                {"Name": "name", "Value": name}
             ],
             MessageAction='SUPPRESS'
         )
@@ -50,7 +55,7 @@ def lambda_handler(event, context):
         # Send welcome email with credentials
         email_subject = "Welcome to the Platform – Your Account Details"
         email_body = (
-            f"Dear User,\n\n"
+            f"Dear {name},\n\n"
             f"Your account has been successfully created and added to the group '{group}'.\n\n"
             f"Login Credentials:\n"
             f"Email: {username}\n"
@@ -508,3 +513,5 @@ sudo apt update
 sudo apt install -y mongodb-org pritunl
 sudo systemctl enable mongod pritunl
 sudo systemctl start mongod pritunl
+
+
