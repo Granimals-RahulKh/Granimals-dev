@@ -6,6 +6,16 @@ variable "region" {
   default     = "ap-south-1"
 }
 
+variable "push_onboarding_lambda_s3_key" {
+  description = "S3 key for insert onboarding question lambda package"
+  type        = string
+}
+
+variable "pull_onboarding_lambda_s3_key" {
+  description = "S3 key for get onboarding questions lambda package"
+  type        = string
+}
+
 
 variable "insert_diet_plan_lambda_s3_key" {
   description = "S3 key of the insert_diet_plan Lambda ZIP"
@@ -123,4 +133,43 @@ variable "user_pool_client_secret" {
   type        = string
   sensitive   = true
   default     = null
+}
+variable "push_data_lambda_s3_key" {
+  description = "S3 key of the push_data_to_rds Lambda ZIP"
+  type        = string
+  default     = null
+}
+
+variable "pull_data_lambda_s3_key" {
+  description = "S3 key of the pull_data_from_rds Lambda ZIP"
+  type        = string
+  default     = null
+}
+
+variable "user_pool_client_id_app" {
+  type    = string
+  default = null
+}
+
+variable "user_pool_client_secret_app" {
+  type      = string
+  sensitive = true
+  default   = null
+}
+
+variable "chatgpt_integration_lambda_s3_key" {
+  type      = string
+  sensitive = true
+  default   = null
+}
+
+variable "openai_secret_arn" {
+  type    = string
+  default = null
+}
+
+variable "environment_variables" {
+  description = "Environment variables for Lambda"
+  type        = map(string)
+  default     = {}
 }

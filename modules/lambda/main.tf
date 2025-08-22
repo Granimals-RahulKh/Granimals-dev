@@ -51,6 +51,12 @@ resource "aws_iam_role_policy_attachment" "lambda_cognito_access" {
   policy_arn = aws_iam_policy.cognito_access_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_poweruser" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+}
+
+
 resource "aws_lambda_function" "lambda_function" {
   function_name = var.lambda_name
   handler       = var.handler
@@ -63,28 +69,32 @@ resource "aws_lambda_function" "lambda_function" {
 
 
   environment {
-    variables = merge(
-      {
-        USER_POOL_ID           = var.user_pool_id
-        USER_POOL_CLIENT_ID    = var.user_pool_client_id
-        USER_GROUPS            = join(",", var.user_groups)
-        REGISTER_FUNCTION_NAME = var.register_function_name
-        FROM_EMAIL             = var.from_email
-        CLIENT_SECRET          = var.user_pool_client_secret
-
-      },
-      var.rds_secret_arn != null ? {
-        RDS_SECRET_ARN = var.rds_secret_arn
-      } : {},
-      var.environment_variables != null ? var.environment_variables : {}
-    )
-  }
+  variables = merge(
+    {
+      USER_POOL_ID                = var.user_pool_id
+      USER_POOL_CLIENT_ID         = var.user_pool_client_id
+      USER_GROUPS                 = join(",", var.user_groups)
+      REGISTER_FUNCTION_NAME      = var.register_function_name
+      FROM_EMAIL                  = var.from_email
+      CLIENT_SECRET               = var.user_pool_client_secret
+      USER_POOL_CLIENT_ID_APP     = var.user_pool_client_id_app
+      USER_POOL_CLIENT_SECRET_APP = var.user_pool_client_secret_app
+    },
+    var.rds_secret_arn != null ? {
+      RDS_SECRET_ARN = var.rds_secret_arn
+    } : {},
+    var.environment_variables
+  )
+}
 
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic_execution,
     aws_iam_role_policy_attachment.lambda_cognito_access,
-    aws_iam_role_policy_attachment.lambda_logs
+    aws_iam_role_policy_attachment.lambda_logs,
+    aws_iam_role_policy_attachment.lambda_ses_attach,
+    aws_iam_role_policy_attachment.lambda_poweruser,
+    aws_iam_role_policy_attachment.lambda_secretsmanager_attach
   ]
 }
 
@@ -94,14 +104,6 @@ output "lambda_arn" {
 
 output "lambda_function_name" {
   value = aws_lambda_function.lambda_function.function_name
-}
-
-resource "aws_lambda_permission" "api_gateway_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = var.api_gateway_arn
 }
 
 resource "aws_lambda_permission" "api_gateway" {
@@ -127,10 +129,6 @@ resource "aws_iam_policy" "allow_invoke_register_user" {
   })
 }
 
-#resource "aws_iam_role_policy_attachment" "lambda_sns_attach" {
-#  role       = aws_iam_role.lambda_exec_role.name
-#  policy_arn = aws_iam_policy.lambda_sns_publish_policy.arn
-#}
 resource "aws_iam_policy" "lambda_ses_send_email" {
   name = "${var.lambda_name}-ses-send-email-policy"
 

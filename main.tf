@@ -23,97 +23,97 @@ locals {
 
 
 module "lambda_register_user" {
-  source                  = "./modules/lambda"
-  lambda_name             = "register_user"
-  handler                 = "register_user.lambda_handler"
-  runtime                 = "python3.12"
-  user_pool_id            = var.user_pool_id
-  user_pool_arn           = var.user_pool_arn
-  user_pool_client_id     = var.user_pool_client_id
-  lambda_s3_bucket        = var.lambda_s3_bucket
-  lambda_function_key     = var.register_user_lambda_s3_key
-  user_groups             = local.user_groups
-  api_gateway_arn         = module.api_gateway.api_gateway_arn
-  api_gateway_paths       = ["register_user"]
-  from_email              = var.from_email
-  layers                  = [var.lambda_layer_arn]
-  user_pool_client_secret = var.user_pool_client_secret
-  #  sns_topic_arn       = module.sns.sns_topic_arn
+  source                      = "./modules/lambda"
+  lambda_name                 = "register_user"
+  handler                     = "register_user.lambda_handler"
+  runtime                     = "python3.12"
+  user_pool_id                = var.user_pool_id
+  user_pool_arn               = var.user_pool_arn
+  user_pool_client_id         = var.user_pool_client_id
+  lambda_s3_bucket            = var.lambda_s3_bucket
+  lambda_function_key         = var.register_user_lambda_s3_key
+  user_groups                 = local.user_groups
+  api_gateway_arn             = module.api_gateway.api_gateway_arn
+  api_gateway_paths           = ["register_user"]
+  from_email                  = var.from_email
+  layers                      = [var.lambda_layer_arn]
+  user_pool_client_secret     = var.user_pool_client_secret
+  user_pool_client_id_app     = var.user_pool_client_id_app
+  user_pool_client_secret_app = var.user_pool_client_secret_app
 }
 
 module "lambda_delete_user" {
-  source                  = "./modules/lambda"
-  lambda_name             = "delete_user"
-  handler                 = "delete_user.lambda_handler"
-  runtime                 = "python3.12"
-  user_pool_id            = var.user_pool_id
-  user_pool_arn           = var.user_pool_arn
-  user_pool_client_id     = var.user_pool_client_id
-  lambda_s3_bucket        = var.lambda_s3_bucket
-  lambda_function_key     = var.delete_user_lambda_s3_key
-  user_groups             = local.user_groups
-  api_gateway_arn         = module.api_gateway.api_gateway_arn
-  api_gateway_paths       = ["delete_user"]
-  from_email              = var.from_email
-  layers                  = [var.lambda_layer_arn]
-  user_pool_client_secret = var.user_pool_client_secret
-  #  sns_topic_arn       = module.sns.sns_topic_arn
+  source                      = "./modules/lambda"
+  lambda_name                 = "delete_user"
+  handler                     = "delete_user.lambda_handler"
+  runtime                     = "python3.12"
+  user_pool_id                = var.user_pool_id
+  user_pool_arn               = var.user_pool_arn
+  user_pool_client_id         = var.user_pool_client_id
+  lambda_s3_bucket            = var.lambda_s3_bucket
+  lambda_function_key         = var.delete_user_lambda_s3_key
+  user_groups                 = local.user_groups
+  api_gateway_arn             = module.api_gateway.api_gateway_arn
+  api_gateway_paths           = ["delete_user"]
+  from_email                  = var.from_email
+  layers                      = [var.lambda_layer_arn]
+  user_pool_client_secret     = var.user_pool_client_secret
+  user_pool_client_id_app     = var.user_pool_client_id_app
+  user_pool_client_secret_app = var.user_pool_client_secret_app
 }
 
 module "lambda_change_password" {
-  source                  = "./modules/lambda"
-  lambda_name             = "change_password"
-  handler                 = "change_password.lambda_handler"
-  runtime                 = "python3.12"
-  user_pool_id            = var.user_pool_id
-  user_pool_arn           = var.user_pool_arn
-  user_pool_client_id     = var.user_pool_client_id
-  lambda_s3_bucket        = var.lambda_s3_bucket
-  lambda_function_key     = var.change_password_lambda_s3_key
-  user_groups             = local.user_groups
-  api_gateway_arn         = module.api_gateway.api_gateway_arn
-  api_gateway_paths       = ["change_password"]
-  from_email              = var.from_email
-  layers                  = [var.lambda_layer_arn]
-  user_pool_client_secret = var.user_pool_client_secret
-  #  sns_topic_arn       = module.sns.sns_topic_arn
+  source                      = "./modules/lambda"
+  lambda_name                 = "change_password"
+  handler                     = "change_password.lambda_handler"
+  runtime                     = "python3.12"
+  user_pool_id                = var.user_pool_id
+  user_pool_arn               = var.user_pool_arn
+  user_pool_client_id         = var.user_pool_client_id
+  lambda_s3_bucket            = var.lambda_s3_bucket
+  lambda_function_key         = var.change_password_lambda_s3_key
+  user_groups                 = local.user_groups
+  api_gateway_arn             = module.api_gateway.api_gateway_arn
+  api_gateway_paths           = ["change_password"]
+  from_email                  = var.from_email
+  layers                      = [var.lambda_layer_arn]
+  user_pool_client_secret     = var.user_pool_client_secret
+  user_pool_client_id_app     = var.user_pool_client_id_app
+  user_pool_client_secret_app = var.user_pool_client_secret_app
 }
 
 module "lambda_login" {
-  source                  = "./modules/lambda"
-  lambda_name             = "login"
-  handler                 = "login.lambda_handler"
-  runtime                 = "python3.12"
-  user_pool_id            = var.user_pool_id
-  user_pool_arn           = var.user_pool_arn
-  user_pool_client_id     = var.user_pool_client_id
-  register_function_name  = module.lambda_register_user.lambda_function_name
-  lambda_s3_bucket        = var.lambda_s3_bucket
-  lambda_function_key     = var.login_lambda_s3_key
-  user_groups             = local.user_groups
-  api_gateway_arn         = module.api_gateway.api_gateway_arn
-  api_gateway_paths       = ["login"]
-  from_email              = var.from_email
-  layers                  = [var.lambda_layer_arn]
-  user_pool_client_secret = var.user_pool_client_secret
-  #  sns_topic_arn       = module.sns.sns_topic_arn
+  source                      = "./modules/lambda"
+  lambda_name                 = "login"
+  handler                     = "login.lambda_handler"
+  runtime                     = "python3.12"
+  user_pool_id                = var.user_pool_id
+  user_pool_arn               = var.user_pool_arn
+  user_pool_client_id         = var.user_pool_client_id
+  register_function_name      = module.lambda_register_user.lambda_function_name
+  lambda_s3_bucket            = var.lambda_s3_bucket
+  lambda_function_key         = var.login_lambda_s3_key
+  user_groups                 = local.user_groups
+  api_gateway_arn             = module.api_gateway.api_gateway_arn
+  api_gateway_paths           = ["login"]
+  from_email                  = var.from_email
+  layers                      = [var.lambda_layer_arn]
+  user_pool_client_secret     = var.user_pool_client_secret
+  user_pool_client_id_app     = var.user_pool_client_id_app
+  user_pool_client_secret_app = var.user_pool_client_secret_app
 }
 
 module "lambda_insert_diet_plan" {
-  source                  = "./modules/lambda"
-  lambda_name             = "insert_diet_plan"
-  handler                 = "insert_diet_plan.lambda_handler"
-  runtime                 = "python3.12"
-  lambda_s3_bucket        = var.lambda_s3_bucket
-  lambda_function_key     = var.insert_diet_plan_lambda_s3_key
-  api_gateway_arn         = module.api_gateway.api_gateway_arn
-  api_gateway_paths       = ["insert_diet_plan"]
-  rds_secret_arn          = var.rds_secret_arn
-  layers                  = [var.lambda_layer_arn]
-  user_pool_client_secret = var.user_pool_client_secret
-  #  DB_NAME             = var.db_name
-  #  DB_HOST             = var.db_host
-  #  DB_PORT             = var.db_port
+  source              = "./modules/lambda"
+  lambda_name         = "insert_diet_plan"
+  handler             = "insert_diet_plan.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.insert_diet_plan_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["insert_diet_plan"]
+  rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
 }
 
 module "lambda_push_data_to_rds" {
@@ -127,13 +127,6 @@ module "lambda_push_data_to_rds" {
   api_gateway_paths   = ["push_data_to_rds"]
   rds_secret_arn      = var.rds_secret_arn
   layers              = [var.lambda_layer_arn]
-
-  # DB connection details for schema-aware queries
-  environment_variables = {
-    DB_HOST = var.db_host
-    DB_PORT = var.db_port
-    DB_NAME = var.db_name
-  }
 }
 
 module "lambda_pull_data_from_rds" {
@@ -147,12 +140,59 @@ module "lambda_pull_data_from_rds" {
   api_gateway_paths   = ["pull_data_from_rds"]
   rds_secret_arn      = var.rds_secret_arn
   layers              = [var.lambda_layer_arn]
+}
 
+# ---------------------------------------------------------
+# push Onboarding Question Lambda (Push)
+# ---------------------------------------------------------
+module "lambda_push_onboarding_question" {
+  source              = "./modules/lambda"
+  lambda_name         = "push_onboarding_question"
+  handler             = "push_onboarding_question.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.push_onboarding_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["push_onboarding_question"]
+  rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
+}
+
+# ---------------------------------------------------------
+# pull Onboarding Questions Lambda (Pull)
+# ---------------------------------------------------------
+module "lambda_pull_onboarding_questions" {
+  source              = "./modules/lambda"
+  lambda_name         = "pull_onboarding_questions"
+  handler             = "pull_onboarding_question.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.pull_onboarding_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["pull_onboarding_questions"]
+  rds_secret_arn      = var.rds_secret_arn
+  layers              = [var.lambda_layer_arn]
+}
+
+
+module "lambda_chatgpt_integration" {
+  source              = "./modules/lambda"
+  lambda_name         = "chatgpt_integration"
+  handler             = "chatgpt_integration.lambda_handler"
+  runtime             = "python3.12"
+  lambda_s3_bucket    = var.lambda_s3_bucket
+  lambda_function_key = var.chatgpt_integration_lambda_s3_key
+  api_gateway_arn     = module.api_gateway.api_gateway_arn
+  api_gateway_paths   = ["chatgpt_integration"]
+  layers              = [var.lambda_layer_arn]
   environment_variables = {
-    DB_HOST = var.db_host
-    DB_PORT = var.db_port
-    DB_NAME = var.db_name
+  OPENAI_API_KEY   = var.openai_secret_arn
+  FRONTEND_ORIGIN  = "*"
   }
+}
+
+data "aws_secretsmanager_secret_version" "openai" {
+  secret_id = var.openai_secret_arn
 }
 
 
@@ -165,10 +205,18 @@ module "api_gateway" {
   api_stage_name  = "dev"
   tags            = var.tags
   user_pool_arn   = var.user_pool_arn
+#  openai_api_key  = data.aws_secretsmanager_secret_version.openai.secret_string
 
-  register_user_lambda_arn    = module.lambda_register_user.lambda_arn
-  change_password_lambda_arn  = module.lambda_change_password.lambda_arn
-  delete_user_lambda_arn      = module.lambda_delete_user.lambda_arn
-  login_lambda_arn            = module.lambda_login.lambda_arn
-  insert_diet_plan_lambda_arn = module.lambda_insert_diet_plan.lambda_arn
+  register_user_lambda_arn             = module.lambda_register_user.lambda_arn
+  change_password_lambda_arn           = module.lambda_change_password.lambda_arn
+  delete_user_lambda_arn               = module.lambda_delete_user.lambda_arn
+  login_lambda_arn                     = module.lambda_login.lambda_arn
+  insert_diet_plan_lambda_arn          = module.lambda_insert_diet_plan.lambda_arn
+  push_data_to_rds_lambda_arn          = module.lambda_push_data_to_rds.lambda_arn
+  pull_data_from_rds_lambda_arn        = module.lambda_pull_data_from_rds.lambda_arn
+  push_onboarding_question_lambda_arn  = module.lambda_push_onboarding_question.lambda_arn
+  pull_onboarding_questions_lambda_arn = module.lambda_pull_onboarding_questions.lambda_arn
+  chatgpt_integration_lambda_arn       = module.lambda_chatgpt_integration.lambda_arn
+#  chatgpt_integration_lambda_name      = module.lambda_chatgpt_integration.lambda_name
+
 }

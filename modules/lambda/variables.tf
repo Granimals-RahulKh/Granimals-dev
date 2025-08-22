@@ -85,9 +85,50 @@ variable "user_pool_client_secret" {
   description = "Client secret for Cognito User Pool"
   type        = string
   sensitive   = true
+  default     = null
 }
 variable "environment_variables" {
   type        = map(string)
   description = "Extra environment variables for the Lambda function"
+  default     = null
+}
+variable "push_data_lambda_s3_key" {
+  description = "S3 key of the push_data_to_rds Lambda ZIP"
+  type        = string
+  default     = null
+}
+
+variable "pull_data_lambda_s3_key" {
+  description = "S3 key of the pull_data_from_rds Lambda ZIP"
+  type        = string
+  default     = null
+}
+
+variable "user_pool_client_id_app" {
+  type    = string
+  default = null
+}
+
+variable "user_pool_client_secret_app" {
+  type      = string
+  sensitive = true
+  default   = null
+}
+
+variable "push_onboarding_lambda_s3_key" {
+  description = "S3 key for insert onboarding question lambda package"
+  type        = string
+  default     = null
+}
+
+variable "pull_onboarding_lambda_s3_key" {
+  description = "S3 key for get onboarding questions lambda package"
+  type        = string
+  default     = null
+}
+
+variable "openai_secret_arn" {
+  description = "Secrets Manager ARN containing the OpenAI API key"
+  type        = string
   default     = null
 }

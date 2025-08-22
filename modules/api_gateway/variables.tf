@@ -55,3 +55,26 @@ variable "user_pool_arn" {
   description = "ARN of the Cognito user pool"
   type        = string
 }
+variable "push_data_to_rds_lambda_arn" { type = string }
+variable "pull_data_from_rds_lambda_arn" { type = string }
+variable "push_onboarding_question_lambda_arn" {
+  type        = string
+  description = "ARN of the Lambda function for pushing onboarding questions"
+}
+
+variable "pull_onboarding_questions_lambda_arn" {
+  type        = string
+  description = "ARN of the Lambda function for pulling onboarding questions"
+}
+variable "chatgpt_integration_lambda_arn" { type = string }
+#variable "openai_api_key" {
+#  description = "OpenAI API Key for ChatGPT"
+#  type        = string
+#  sensitive   = true
+#}
+
+variable "openai_model" {
+  description = "ChatGPT model to be used"
+  type        = string
+  default     = "gpt-4o-mini"
+}
