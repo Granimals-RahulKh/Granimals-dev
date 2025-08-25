@@ -317,7 +317,7 @@ resource "aws_api_gateway_integration" "pull_onboarding_question_integration" {
 resource "aws_api_gateway_resource" "chatgpt" {
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
   parent_id   = aws_api_gateway_rest_api.auth_api.root_resource_id
-  path_part   = "chatgpt_integration"
+  path_part   = "ai_food_stats_calculator"
 }
 
 resource "aws_api_gateway_method" "chatgpt_any" {
@@ -327,13 +327,13 @@ resource "aws_api_gateway_method" "chatgpt_any" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "chatgpt_integration" {
+resource "aws_api_gateway_integration" "ai_food_stats_calculator" {
   rest_api_id             = aws_api_gateway_rest_api.auth_api.id
   resource_id             = aws_api_gateway_resource.chatgpt.id
   http_method             = aws_api_gateway_method.chatgpt_any.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.chatgpt_integration_lambda_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.ai_food_stats_calculator_lambda_arn}/invocations"
 }
 
 
@@ -350,7 +350,7 @@ resource "aws_api_gateway_deployment" "auth_deployment" {
     aws_api_gateway_integration.push_data_to_rds_integration,
     aws_api_gateway_integration.pull_data_from_rds_integration,
     aws_api_gateway_integration.pull_onboarding_question_integration,
-    aws_api_gateway_integration.chatgpt_integration,
+    aws_api_gateway_integration.ai_food_stats_calculator,
   ]
   rest_api_id = aws_api_gateway_rest_api.auth_api.id
   description = "Deployment for API Gateway"

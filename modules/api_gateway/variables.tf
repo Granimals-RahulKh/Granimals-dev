@@ -66,7 +66,7 @@ variable "pull_onboarding_questions_lambda_arn" {
   type        = string
   description = "ARN of the Lambda function for pulling onboarding questions"
 }
-variable "chatgpt_integration_lambda_arn" { type = string }
+variable "ai_food_stats_calculator_lambda_arn" { type = string }
 #variable "openai_api_key" {
 #  description = "OpenAI API Key for ChatGPT"
 #  type        = string

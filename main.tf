@@ -175,19 +175,19 @@ module "lambda_pull_onboarding_questions" {
 }
 
 
-module "lambda_chatgpt_integration" {
+module "lambda_ai_food_stats_calculator" {
   source              = "./modules/lambda"
-  lambda_name         = "chatgpt_integration"
-  handler             = "chatgpt_integration.lambda_handler"
+  lambda_name         = "ai_food_stats_calculator"
+  handler             = "ai_food_stats_calculator.lambda_handler"
   runtime             = "python3.12"
   lambda_s3_bucket    = var.lambda_s3_bucket
-  lambda_function_key = var.chatgpt_integration_lambda_s3_key
+  lambda_function_key = var.ai_food_stats_calculator_lambda_s3_key
   api_gateway_arn     = module.api_gateway.api_gateway_arn
-  api_gateway_paths   = ["chatgpt_integration"]
+  api_gateway_paths   = ["ai_food_stats_calculator"]
   layers              = [var.lambda_layer_arn]
   environment_variables = {
-  OPENAI_API_KEY   = var.openai_secret_arn
-  FRONTEND_ORIGIN  = "*"
+    OPENAI_API_KEY  = var.openai_secret_arn
+    FRONTEND_ORIGIN = "*"
   }
 }
 
@@ -205,7 +205,7 @@ module "api_gateway" {
   api_stage_name  = "dev"
   tags            = var.tags
   user_pool_arn   = var.user_pool_arn
-#  openai_api_key  = data.aws_secretsmanager_secret_version.openai.secret_string
+  #  openai_api_key  = data.aws_secretsmanager_secret_version.openai.secret_string
 
   register_user_lambda_arn             = module.lambda_register_user.lambda_arn
   change_password_lambda_arn           = module.lambda_change_password.lambda_arn
@@ -216,7 +216,7 @@ module "api_gateway" {
   pull_data_from_rds_lambda_arn        = module.lambda_pull_data_from_rds.lambda_arn
   push_onboarding_question_lambda_arn  = module.lambda_push_onboarding_question.lambda_arn
   pull_onboarding_questions_lambda_arn = module.lambda_pull_onboarding_questions.lambda_arn
-  chatgpt_integration_lambda_arn       = module.lambda_chatgpt_integration.lambda_arn
-#  chatgpt_integration_lambda_name      = module.lambda_chatgpt_integration.lambda_name
+  ai_food_stats_calculator_lambda_arn  = module.lambda_ai_food_stats_calculator.lambda_arn
+  #  ai_food_stats_calculator_lambda_name      = module.lambda_ai_food_stats_calculator.lambda_name
 
 }

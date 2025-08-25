@@ -157,7 +157,7 @@ variable "user_pool_client_secret_app" {
   default   = null
 }
 
-variable "chatgpt_integration_lambda_s3_key" {
+variable "ai_food_stats_calculator_lambda_s3_key" {
   type      = string
   sensitive = true
   default   = null
